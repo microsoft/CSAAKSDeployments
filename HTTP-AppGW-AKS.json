@@ -35,11 +35,9 @@
       "deployNSGEmptyTemplateURL": "[concat(variables('gitUri'),'/NSG-Empty-ExistingSubnet.json')]",
       "deployPublicIPTemplateURL": "[concat(variables('gitUri'),'/PublicIPAddress.json')]",
       "deployAppGWHTTPListenerTemplateURL": "[concat(variables('gitUri'),'/AppGWHTTPListener.json')]",
-      "createManagedIdentityTemplateURL": "[concat(variables('gitUri'),'/UserAssignedManagedIdentity.json')]",
       "deployAppGWDiagnosticsTemplateURL": "[concat(variables('gitUri'),'/AppGWDiagnostics.json')]",
       "deployAzureBastionDiagnosticsTemplateURL": "[concat(variables('gitUri'),'/AzureBastionDiagnostics.json')]",
       "getSubnetAddressPrefixTemplateURL": "[concat(variables('gitUri'),'/GetSubnetAddressPrefix.json')]",
-      "deployKeyVaultAccessTemplate": "[concat(variables('gitUri'),'/KeyVaultAccessPolicy.json')]",
       "deployLATemplateURL": "[concat(variables('gitUri'),'/Log_Analytics_Workspace.json')]",
       "deployAzureAKSTemplateURL": "[concat(variables('gitUri'),'/AKSMICluster.json')]",
       "deployACRTemplateURL": "[concat(variables('gitUri'),'/ACR.json')]",
@@ -291,11 +289,35 @@
         }
       },
       {
+        "name": "getBastionAddressPrefix",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "resourceGroup": "[resourceGroup().name]",
+        "dependsOn": [
+          "getSharedAddressPrefix"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('getSubnetAddressPrefixTemplateURL')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "vnetName": {
+              "value": "[variables('vnetName')]"
+            },
+            "subnetName": {
+              "value": "AzureBastionSubnet"
+            }
+          }
+        }
+      },
+      {
         "name": "deploySharedNSG",
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "2018-05-01",
         "dependsOn": [
-          "getSharedAddressPrefix"
+          "getBastionAddressPrefix"
         ],
         "properties": {
           "mode": "Incremental",
