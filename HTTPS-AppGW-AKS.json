@@ -99,7 +99,7 @@
       ],
       "appgwMinCapacity": 1,
       "appgwMaxCapacity": 3,
-      "kubernetesVersion": "1.15.11",
+      "kubernetesVersion": "1.17.9",
       "networkPlugin": "azure",
       "enableRBAC": true,
       "enablePrivateCluster": true,
