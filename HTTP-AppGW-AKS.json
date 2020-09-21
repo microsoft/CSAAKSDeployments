@@ -71,6 +71,7 @@
       "addressRange": "192.168.1.0/24",
       "subnets": [
           "AKS-SN|192.168.1.0/25|Enabled",
+          "Data-SN|192.168.1.176/28|Disabled",
           "Shared-SN|192.168.1.160/28|Enabled",
           "AzureBastionSubnet|192.168.1.128/28|Enabled",
           "AppGW-SN|192.168.1.144/28|Enabled"
@@ -266,11 +267,74 @@
         }
       },
       {
+        "name": "getDataAddressPrefix",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "resourceGroup": "[resourceGroup().name]",
+        "dependsOn": [
+          "deployAKSNSG"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('getSubnetAddressPrefixTemplateURL')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "vnetName": {
+              "value": "[variables('vnetName')]"
+            },
+            "subnetName": {
+              "value": "Data-SN"
+            }
+          }
+        }
+      },
+      {
+        "name": "deployDataNSG",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "resourceGroup": "[resourceGroup().name]",
+        "dependsOn": [
+          "getDataAddressPrefix"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('deployNSGTemplateURL')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "virtualNetworkName": {
+              "value": "[variables('vnetName')]"
+            },
+            "subnetName": {
+              "value": "Data-SN"
+            },
+            "addressPrefix": {
+              "value": "[reference('getDataAddressPrefix').outputs.addressPrefix.value]"
+            },
+            "nsgName": {
+              "value": "Data-NSG"
+            },
+            "securityRules": {
+              "value": [
+                "deny-all-ib|Deny-All-Traffic|Tcp|*|*|*|*|Deny|500|Inbound",
+                "deny-all-ob|Deny-All-Traffic|Tcp|*|*|*|*|Deny|500|Outbound"
+              ]
+            },
+            "privateEndpointNetworkPolicies": {
+              "value": "Disabled"
+            }
+          }
+        }
+      },
+      {
         "name": "getSharedAddressPrefix",
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "2018-05-01",
         "dependsOn": [
-          "deployAKSNSG"
+          "deployDataNSG"
         ],
         "properties": {
           "mode": "Incremental",
