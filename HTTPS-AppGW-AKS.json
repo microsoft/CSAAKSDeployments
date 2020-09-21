@@ -762,12 +762,6 @@
             },
             "nodeResourceGroup":{
               "value": "[variables('nodeResourceGroup')]"
-            },
-            "VNetName" : {
-              "value": "[variables('vNETName')]"
-            },
-            "SubnetName" : {
-              "value": "AKS-SN"
             },  
             "dnsPrefix": {
                 "value": "[variables('dnsPrefix')]"
